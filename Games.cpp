@@ -61,10 +61,24 @@ void GameController:: play() {
     //play the game
     while(_game->getGameState() == PLAY) {
         _game->getTurn() ? _game->getPlayerMove() : _game->getComputerMove();
-        //check the game state (getGameState())
+        _game->updateGameState();
     }
 
-    //print the result
+    //print the result of the game
+    _ui->printBoard(_game->getBoard());
+    switch(_game->getGameState()) {
+        case 0:
+            _ui->print("O Won!");
+            break;
+        case 1:
+            _ui->print("X Won!");
+            break;
+        case 2:
+            _ui->print("Draw!");
+            break;
+        default: 
+            exit(1);
+    }
 }
 
 /*============================ UI part =================================*/
@@ -149,8 +163,8 @@ Move Console::getMove(int maxRow, int maxColumn) {
     while(true) {
         string r,c;
         cout<<"> ";
-        cin>>c;
         cin>>r;
+        cin>>c;
 
         if( isNum(r) && isNum(r)){
             move.row = stoi(r);
@@ -221,6 +235,19 @@ vector <Move> TicTacToeGame::findAllFree() const {
     return freeMoves;
 }
 
+
+//check if the board is full
+bool BoardGame::isFullBoard() const {
+    for(int i=0; i<_board.size(); i++) {
+        for(int j=0; j<_board[i].size(); j++) {
+            if(_board[i][j]==0)
+                return false;
+        }
+    }
+    return true;
+}
+
+
 void TicTacToeGame::start() {
     _ui->print("_____ Tic Tac Toe_____ ");                    //print the game name
 
@@ -234,10 +261,87 @@ void TicTacToeGame::start() {
         _computerSign = 'X';
     }
 
-    _ui->print("Format: x y [x-column index, y-row index]");  //print the game format    
+    _ui->print("Format: x y [x-row index, y-column index]");  //print the game format    
     _ui->printBoard(_board);                                  //print the game board
 }
 
+
+void TicTacToeGame::updateGameState() {
+    bool rowFlag = true;
+    bool columnFlag = true;
+    bool diagonalFlag = true;
+    int i=0, j=1;
+    int c,r;
+
+    //check if there is a row with the same non-zero values
+    for(r=0; r<_board.size(); r++) {
+        for(c=1; c<_board[r].size(); c++) {
+            if((_board[r][0] != _board[r][c]) || (_board[r][0]==0) || (_board[r][c] == 0)) {
+                rowFlag = false;
+                break;
+            }
+        }
+        if (rowFlag == true) {
+            if (_board[r][0] == 'O') {  
+                _state = O;
+            }
+            else    _state = X;
+            return;
+        }
+        rowFlag = true;
+    }
+
+    //check if there is a column with the same non-zero values
+    for(c=0; c<_board.size(); c++) {
+        for(r=1; r<_board[c].size(); r++) {
+            if((_board[0][c] != _board[r][c]) || (_board[0][c]==0) || (_board[r][c] == 0)) {
+                columnFlag = false;
+                break;
+            }
+        }
+        if (columnFlag == true) {
+            if (_board[0][c] == 'O') {  
+                _state = O;
+            }
+            else    _state = X;
+            return;
+        }
+        columnFlag = true;
+    }
+
+    //check if there is a diagonal with the same non-zero values
+    for(i=1; i<_board.size(); i++) {
+        if ((_board[0][0] != _board[i][i]) || (_board[0][0]==0) || (_board[i][i] == 0) ) {
+            diagonalFlag = false;
+            break;
+        }
+    }
+    if(diagonalFlag == true) {
+        if (_board[0][0] == 'O') {
+            _state = O;
+        }
+        else    _state = X;
+        return;
+    }
+    if(_board[0][2]!=0 && _board[1][1]!=0 && _board[2][0]!=0) {
+        if(_board[0][2]== _board[1][1] && _board[0][2]== _board[2][0]) {
+            if (_board[0][2] == 'O') {
+                _state = O;
+            }
+            else    _state = X;
+            return;
+        }
+    }
+
+    //check if the board is full
+    if(isFullBoard()) {
+        _state = DRAW;
+        return;
+    }
+
+    //else - continue the game
+    _state = PLAY;
+}
 
 void TicTacToeGame::getPlayerMove() {
     Move move;

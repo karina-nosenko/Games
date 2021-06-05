@@ -3,7 +3,6 @@
 #include <string.h>
 #include <string>
 #include <vector>
-#include <typeinfo>
 
 using namespace std;
 
@@ -105,6 +104,8 @@ public:
     virtual void getPlayerMove()=0;
     virtual void getComputerMove()=0;
     virtual GameState getGameState() const=0;
+    virtual void updateGameState()=0;
+    virtual vector<vector<char>> getBoard() const=0;
 
     virtual bool getTurn() const        { return _turn; }
     virtual void setTurn( bool turn )   { _turn = turn; }
@@ -125,7 +126,9 @@ public:
     virtual void start(){}
     virtual void getPlayerMove(){}
     virtual void getComputerMove(){}
+    virtual void updateGameState(){}
     void updateBoard(Move move, char sign) { _board[move.row][move.column] = sign; }
+    bool isFullBoard() const;
 
     bool getTurn() const                    { return _turn; }
     vector<vector<char>> getBoard() const   { return _board; }
@@ -152,6 +155,7 @@ public:
     virtual void getComputerMove(){}
     bool isFree(Move) const;
     vector <Move> findAllFree() const;
+    void updateGameState();
 
     GameState getGameState() const { return _state; }
 
