@@ -38,7 +38,7 @@ void GameController:: play() {
     //assign the game
     switch(gameOption) {
         case 1:
-            board.resize ( 3 , vector<char> (3,0) ); //define board 3x3 filled with zero
+            board.resize ( BOARD_SIZE , vector<char> (BOARD_SIZE,0) ); //define board 3x3 filled with zero
             
             switch(difficulty) {         
                 case 1:
@@ -205,10 +205,35 @@ bool TicTacToeGame::isFree(Move move) const {
     return _board[move.row][move.column] == 0;
 }
 
+//return a vector of available (free) moves
+vector <Move> TicTacToeGame::findAllFree() const {
+    Move move;
+    vector <Move> freeMoves;
+    for(int i=0; i<BOARD_SIZE; i++) {
+        for(int j=0; j<BOARD_SIZE; j++) {
+            move.column = i;
+            move.row = j;
+            if (isFree(move)) {
+                freeMoves.push_back(move);
+            }
+        }
+    }
+    return freeMoves;
+}
 
 void TicTacToeGame::start() {
     _ui->print("_____ Tic Tac Toe_____ ");                    //print the game name
-    _turn = _ui->ticTacToeSign();                             //get a sign from the user to determine the turn (X starts first)
+
+    _turn = _ui->ticTacToeSign();                             //get a sign from the user and determine the turn (X starts first)
+    if(_turn) {
+        _playerSign = 'X';
+        _computerSign = 'O';
+    }
+    else {
+        _playerSign = 'O';
+        _computerSign = 'X';
+    }
+
     _ui->print("Format: x y [x-column index, y-row index]");  //print the game format    
     _ui->printBoard(_board);                                  //print the game board
 }
@@ -220,19 +245,22 @@ void TicTacToeGame::getPlayerMove() {
     while(true) {
         move = _ui->getMove(2, 2);
         if(isFree(move)) {
-             _board[move.row][move.column] = 'X';
+             _board[move.row][move.column] = _playerSign;
+             updateBoard(move, _playerSign);
              break;
         }
         else {
             _ui->print("Invalid Move");
         }
     }
-
-    _ui->printBoard(_board);
     _turn = !_turn;
 }
 
 void TicTacToeRand::getComputerMove() {
-    cout<<"Computer move"<<endl;
-    exit(1);
+    vector <Move>freeMoves = findAllFree(); //get a vector of all available moves
+    int index = rand() % freeMoves.size();
+    updateBoard(freeMoves[index], _computerSign);   //update a board with random available move
+
+    _turn = !_turn;
+    _ui->printBoard(_board);
 }

@@ -16,6 +16,7 @@ class BoardGame;
 class TicTacToeGame;
 
 enum GameState { O , X , DRAW , PLAY };
+#define  BOARD_SIZE 3
 
 struct Move {
     int row;
@@ -124,13 +125,13 @@ public:
     virtual void start(){}
     virtual void getPlayerMove(){}
     virtual void getComputerMove(){}
+    void updateBoard(Move move, char sign) { _board[move.row][move.column] = sign; }
 
     bool getTurn() const                    { return _turn; }
     vector<vector<char>> getBoard() const   { return _board; }
     virtual GameState getGameState() const  { return _state; }
 
     void setTurn( bool turn )                   { _turn = turn; }   
-    void setBoard( vector<vector<char>> board)  { _board = board; }
     void setGameState( GameState state )        { _state = state; }
 
 protected:
@@ -142,18 +143,21 @@ protected:
 
 class TicTacToeGame: public BoardGame {
 public:
-    TicTacToeGame(): BoardGame() {}
-    TicTacToeGame(vector<vector<char>> board): BoardGame(board) {}
+    TicTacToeGame(): BoardGame(), _playerSign('X'), _computerSign('O') {}
+    TicTacToeGame(vector<vector<char>> board): BoardGame(board), _playerSign('X'), _computerSign('O') {}
     virtual ~TicTacToeGame(){};
 
     void start();
     void getPlayerMove();
     virtual void getComputerMove(){}
     bool isFree(Move) const;
+    vector <Move> findAllFree() const;
 
     GameState getGameState() const { return _state; }
 
-private:
+protected:
+    char _playerSign;
+    char _computerSign;
 };
 
 
