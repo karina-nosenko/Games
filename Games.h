@@ -47,11 +47,10 @@ public:
     virtual int chooseGame()=0;
     virtual int chooseDifficulty()=0;
 
+    virtual void print(string msg)=0;
     virtual void printBoard(vector<vector<char>> board) const=0;
-    virtual void gameStart(string)=0;
     virtual int ticTacToeSign()=0;
-    virtual void printFormat(string)=0;
-    virtual Move getMove()=0;
+    virtual Move getMove(int, int)=0;
 
 private:
 };
@@ -66,11 +65,10 @@ public:
     int chooseGame();
     int chooseDifficulty();
 
+    void print(string msg) { cout<<msg<<endl; }
     void printBoard(vector<vector<char>> board) const;
-    void gameStart( string start ) { cout<<start<<endl; }
     int ticTacToeSign();
-    void printFormat( string format ) { cout<<format<<endl; }
-    Move getMove();
+    Move getMove(int, int);
 
 private:
 
@@ -86,11 +84,10 @@ public:
     int chooseGame() { return 0; }
     int chooseDifficulty() { return 0; }
 
+    void print(string msg) { cout<<msg<<endl; }
     void printBoard(vector<vector<char>> board) const {}
-    void gameStart( string start ) {}
     int ticTacToeSign() { return 0; }
-    void printFormat( string format ) { }
-    Move getMove() { Move move{0,0}; return move; }
+    Move getMove(int, int) { Move move{0,0}; return move; }
 
 private:
 
@@ -150,8 +147,9 @@ public:
     virtual ~TicTacToeGame(){};
 
     void start();
-    void getPlayerMove(){cout<<"Player!"<<endl;}
+    void getPlayerMove();
     virtual void getComputerMove(){}
+    bool isFree(Move) const;
 
     GameState getGameState() const { return _state; }
 
@@ -177,7 +175,7 @@ public:
     TicTacToeRand(vector<vector<char>> board): TicTacToeGame(board) {}
     ~TicTacToeRand(){};
     
-    void getComputerMove(){cout<<"Random computer!"<<endl;}
+    void getComputerMove();
 
 private:
 };

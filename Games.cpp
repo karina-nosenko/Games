@@ -59,9 +59,12 @@ void GameController:: play() {
     _game->start();
 
     //play the game
-    //while(_game->getGameState() == PLAY) {
+    while(_game->getGameState() == PLAY) {
         _game->getTurn() ? _game->getPlayerMove() : _game->getComputerMove();
-    //}
+        //check the game state (getGameState())
+    }
+
+    //print the result
 }
 
 /*============================ UI part =================================*/
@@ -98,6 +101,7 @@ int Console:: chooseGame() {
 
 //Print the game board
 void Console::printBoard(vector<vector<char>> board) const {
+    cout<<endl;
     for(int i=0; i<board.size(); i++) {
         for( int j=0; j<board[0].size(); j++) {
             if (board[i][j] == 0)   cout<<"-   ";
@@ -105,6 +109,7 @@ void Console::printBoard(vector<vector<char>> board) const {
         }
         cout<<endl;
     }
+    cout<<endl;
 }
 
 
@@ -138,9 +143,24 @@ int Console::ticTacToeSign() {
 
 
 //get the move from the user
-Move Console::getMove() {
-    Move move = {0,0};
-    return move;
+Move Console::getMove(int maxRow, int maxColumn) {
+    Move move;
+    
+    while(true) {
+        string r,c;
+        cout<<"> ";
+        cin>>c;
+        cin>>r;
+
+        if( isNum(r) && isNum(r)){
+            move.row = stoi(r);
+            move.column = stoi(c);
+            if( move.row>=0 && move.row<=maxRow && move.column>=0 && move.column<=maxColumn )
+                return move;
+            else cout<< "Invalid Move"<<endl;
+        }
+        else cout<< "Invalid Move"<<endl;
+    } 
 }
 
 
@@ -180,9 +200,39 @@ BoardGame::BoardGame(vector<vector<char>> board)
     {}
 
 
+//check if the place on the board is free
+bool TicTacToeGame::isFree(Move move) const {
+    return _board[move.row][move.column] == 0;
+}
+
+
 void TicTacToeGame::start() {
-    _ui->gameStart("_____ Tic Tac Toe_____ ");                      //print the game name
-    _turn = _ui->ticTacToeSign();                                   //get a sign from the user to determine the turn (X starts first)
-    _ui->printFormat("Format: x y [x-row index, y-column index]");  //print the game format    
-    _ui->printBoard(_board);                                        //print the game board
+    _ui->print("_____ Tic Tac Toe_____ ");                    //print the game name
+    _turn = _ui->ticTacToeSign();                             //get a sign from the user to determine the turn (X starts first)
+    _ui->print("Format: x y [x-column index, y-row index]");  //print the game format    
+    _ui->printBoard(_board);                                  //print the game board
+}
+
+
+void TicTacToeGame::getPlayerMove() {
+    Move move;
+
+    while(true) {
+        move = _ui->getMove(2, 2);
+        if(isFree(move)) {
+             _board[move.row][move.column] = 'X';
+             break;
+        }
+        else {
+            _ui->print("Invalid Move");
+        }
+    }
+
+    _ui->printBoard(_board);
+    _turn = !_turn;
+}
+
+void TicTacToeRand::getComputerMove() {
+    cout<<"Computer move"<<endl;
+    exit(1);
 }
