@@ -22,7 +22,7 @@ struct Move {
     int column;
 };
 
-/*============= Bound between Game UI and the Game logic ================*/
+/*============= Connect between Game UI and the Game logic ================*/
 
 class GameController {
 public: 
@@ -44,6 +44,7 @@ public:
     virtual ~GamesUI(){}
 
     virtual void start()=0;
+    virtual int end()=0;
     virtual int chooseGame()=0;
     virtual int chooseDifficulty()=0;
 
@@ -62,6 +63,7 @@ public:
     ~Console(){}
 
     void start();
+    int end();
     int chooseGame();
     int chooseDifficulty();
 
@@ -81,6 +83,7 @@ public:
     ~GUI(){}
 
     void start() { cout<<"Graphical interface unavailable."<<endl; exit(1); }
+    int end(){ return 0; }
     int chooseGame() { return 0; }
     int chooseDifficulty() { return 0; }
 
@@ -106,6 +109,7 @@ public:
     virtual GameState getGameState() const=0;
     virtual void updateGameState()=0;
     virtual vector<vector<char>> getBoard() const=0;
+    virtual void clear()=0;
 
     virtual bool getTurn() const        { return _turn; }
     virtual void setTurn( bool turn )   { _turn = turn; }
@@ -129,6 +133,7 @@ public:
     virtual void updateGameState(){}
     void updateBoard(Move move, char sign) { _board[move.row][move.column] = sign; }
     bool isFullBoard() const;
+    void clear();
 
     bool getTurn() const                    { return _turn; }
     vector<vector<char>> getBoard() const   { return _board; }

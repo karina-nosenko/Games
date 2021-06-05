@@ -9,7 +9,7 @@ bool isNum(string num) {
     return true;
 }
 
-/*============= Bound between Game UI and the Game logic ================*/
+/*============= Connect between Game UI and the Game logic ================*/
 
 GameController:: GameController (char const* mode) {
     string console = "console";
@@ -27,57 +27,81 @@ GameController:: ~GameController () {
 
 
 void GameController:: play() {
+    int option;
     int gameOption;
     int difficulty;
+    bool mainMenu = true;
     vector<vector<char>> board; 
 
-    _ui->start();
-    gameOption = _ui->chooseGame();
-    difficulty = _ui->chooseDifficulty();
+    while(mainMenu) {
+        _ui->start();
+        gameOption = _ui->chooseGame();
+        difficulty = _ui->chooseDifficulty();
 
-    //assign the game
-    switch(gameOption) {
-        case 1:
-            board.resize ( BOARD_SIZE , vector<char> (BOARD_SIZE,0) ); //define board 3x3 filled with zero
-            
-            switch(difficulty) {         
+        //assign the game
+        switch(gameOption) {
+            case 1:
+                board.resize ( BOARD_SIZE , vector<char> (BOARD_SIZE,0) ); //define board 3x3 filled with zero
+                
+                switch(difficulty) {         
+                    case 1:
+                        _game = new TicTacToeRand(board);
+                        break;
+                    case 2:
+                        _game = new TicTacToeEdu(board);
+                        break;
+                    default:
+                        exit(1);
+                }
+                break;
+            default:
+                exit(1);
+        }
+        _game->setUI(*_ui);
+        mainMenu = false;
+
+        while(mainMenu == false) {
+            _game->start();
+
+            //play the game
+            while(_game->getGameState() == PLAY) {
+                _game->getTurn() ? _game->getPlayerMove() : _game->getComputerMove();
+                _game->updateGameState();
+            }
+
+            //print the result of the game
+            _ui->printBoard(_game->getBoard());
+            switch(_game->getGameState()) {
+                case 0:
+                    _ui->print("O Won!");
+                    break;
                 case 1:
-                    _game = new TicTacToeRand(board);
+                    _ui->print("X Won!");
                     break;
                 case 2:
-                    _game = new TicTacToeEdu(board);
+                    _ui->print("Draw!");
                     break;
+                default: 
+                    exit(1);
+            }
+            cout<<endl;
+
+            _game->clear(); //return the game to the initial parameters
+
+            //ask what to do next
+            option = _ui->end();
+            switch(option) {
+                case 1:     //Play again
+                    break;
+                case 2:     //Return to the main Menu
+                    mainMenu = true;
+                    break;
+                case 3:     //Exit
+                    exit(1);
                 default:
                     exit(1);
             }
-            break;
-        default:
-            exit(1);
-    }
-    _game->setUI(*_ui);
-
-    _game->start();
-
-    //play the game
-    while(_game->getGameState() == PLAY) {
-        _game->getTurn() ? _game->getPlayerMove() : _game->getComputerMove();
-        _game->updateGameState();
-    }
-
-    //print the result of the game
-    _ui->printBoard(_game->getBoard());
-    switch(_game->getGameState()) {
-        case 0:
-            _ui->print("O Won!");
-            break;
-        case 1:
-            _ui->print("X Won!");
-            break;
-        case 2:
-            _ui->print("Draw!");
-            break;
-        default: 
-            exit(1);
+        }
     }
 }
 
@@ -103,6 +127,30 @@ int Console:: chooseGame() {
         if( isNum(gameOption) ){
             result = stoi(gameOption);
             if( result==1 )
+                break;
+            else cout<< "Wrong Input"<<endl;
+        }
+        else cout<< "Wrong Input"<<endl;
+    }
+
+    return result;
+}
+
+//Asl the user what to do in the end of the game
+int Console:: end() {
+    string option;
+    int result=0;
+
+    while(true){
+        cout<< "1 - Play again"<<endl;
+        cout<< "2 - Return to the Main Menu"<<endl;
+        cout<< "3 - Exit"<<endl;
+        cout<< "> ";
+        cin>>option;
+
+        if( isNum(option) ){
+            result = stoi(option);
+            if( result>=1 && result<=3 )
                 break;
             else cout<< "Wrong Input"<<endl;
         }
@@ -212,6 +260,17 @@ BoardGame::BoardGame()
 BoardGame::BoardGame(vector<vector<char>> board)
     :Game(), _state(PLAY), _board(board)
     {}
+
+//zero the board values and the game state
+void BoardGame::clear() {
+    for(int i=0; i<_board.size(); i++) {
+        for(int j=0; j<_board[i].size(); j++) {
+            _board[i][j] = 0;
+        }
+    }
+
+    _state = PLAY;
+}
 
 
 //check if the place on the board is free
@@ -365,6 +424,16 @@ void TicTacToeRand::getComputerMove() {
     int index = rand() % freeMoves.size();
     updateBoard(freeMoves[index], _computerSign);   //update a board with random available move
 
+    _turn = !_turn;
+    _ui->printBoard(_board);
+}
+
+void TicTacToeEdu::getComputerMove() {
+
+
+
+
+    //updateBoard(Move, sign)
     _turn = !_turn;
     _ui->printBoard(_board);
 }
