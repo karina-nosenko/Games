@@ -54,10 +54,12 @@ void GameController:: play() {
         default:
             exit(1);
     }
+    _game->setUI(*_ui);
 
     _game->start();
 
-    //while(_game->getGameState()) {
+    //play the game
+    //while(_game->getGameState() == PLAY) {
         _game->getTurn() ? _game->getPlayerMove() : _game->getComputerMove();
     //}
 }
@@ -69,6 +71,8 @@ void Console:: start() {
     cout<< "======================\n"<<endl;
 }
 
+
+//Choose the game
 int Console:: chooseGame() {
     string gameOption;
     int result=0;
@@ -91,6 +95,56 @@ int Console:: chooseGame() {
     return result;
 }
 
+
+//Print the game board
+void Console::printBoard(vector<vector<char>> board) const {
+    for(int i=0; i<board.size(); i++) {
+        for( int j=0; j<board[0].size(); j++) {
+            if (board[i][j] == 0)   cout<<"-   ";
+            else    cout<<board[i][j]<<"   ";
+        }
+        cout<<endl;
+    }
+}
+
+
+//Get player sign ( 0=O, 1=X )
+int Console::ticTacToeSign() {
+    string sign;
+    int result;
+    
+    while(true){
+        cout<< "Choose your sign:"<<endl;
+        cout<< "1 - X"<<endl;
+        cout<< "2 - O"<<endl;
+        cout<< "> ";
+        cin>>sign;
+
+        if( isNum(sign) ){
+            result = stoi(sign);
+            if( result==1 ){
+                return 1;
+                break;
+            }
+            else if( result==2 ){
+                return 0;
+                break;
+            }
+            else cout<< "Wrong Input"<<endl;
+        }
+        else cout<< "Wrong Input"<<endl;
+    }
+}
+
+
+//get the move from the user
+Move Console::getMove() {
+    Move move = {0,0};
+    return move;
+}
+
+
+//Choose the game difficulty
 int Console:: chooseDifficulty() {
     string difficulty;
     int result;
@@ -125,46 +179,10 @@ BoardGame::BoardGame(vector<vector<char>> board)
     :Game(), _state(PLAY), _board(board)
     {}
 
-void BoardGame::print () const {
-    for(int i=0; i<_board.size(); i++) {
-        for( int j=0; j<_board[0].size(); j++) {
-            if (_board[i][j] == 0)   cout<<"-   ";
-            else    cout<<_board[i][j]<<"   ";
-        }
-        cout<<endl;
-    }
-}
 
 void TicTacToeGame::start() {
-    string sign;
-    int result;
-
-    cout<< "_____ Tic Tac Toe_____ "<<endl;
-
-    //get the player sign
-    while(true){
-        cout<< "Choose your sign:"<<endl;
-        cout<< "1 - X"<<endl;
-        cout<< "2 - O"<<endl;
-        cout<< "> ";
-        cin>>sign;
-
-        if( isNum(sign) ){
-            result = stoi(sign);
-            if( result==1 ){
-                _turn = 1;
-                break;
-            }
-            else if( result==2 ){
-                _turn = 0;
-                break;
-            }
-            else cout<< "Wrong Input"<<endl;
-        }
-        else cout<< "Wrong Input"<<endl;
-    }
-
-    cout<< "Format: x y [x-row index, y-column index]"<<endl;
-    
-    BoardGame::print();
+    _ui->gameStart("_____ Tic Tac Toe_____ ");                      //print the game name
+    _turn = _ui->ticTacToeSign();                                   //get a sign from the user to determine the turn (X starts first)
+    _ui->printFormat("Format: x y [x-row index, y-column index]");  //print the game format    
+    _ui->printBoard(_board);                                        //print the game board
 }

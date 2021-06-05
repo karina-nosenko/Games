@@ -3,6 +3,7 @@
 #include <string.h>
 #include <string>
 #include <vector>
+#include <typeinfo>
 
 using namespace std;
 
@@ -13,6 +14,13 @@ class GUI;
 class Game;
 class BoardGame;
 class TicTacToeGame;
+
+enum GameState { O , X , DRAW , PLAY };
+
+struct Move {
+    int row;
+    int column;
+};
 
 /*============= Bound between Game UI and the Game logic ================*/
 
@@ -39,7 +47,11 @@ public:
     virtual int chooseGame()=0;
     virtual int chooseDifficulty()=0;
 
-protected:
+    virtual void printBoard(vector<vector<char>> board) const=0;
+    virtual void gameStart(string)=0;
+    virtual int ticTacToeSign()=0;
+    virtual void printFormat(string)=0;
+    virtual Move getMove()=0;
 
 private:
 };
@@ -53,6 +65,12 @@ public:
     void start();
     int chooseGame();
     int chooseDifficulty();
+
+    void printBoard(vector<vector<char>> board) const;
+    void gameStart( string start ) { cout<<start<<endl; }
+    int ticTacToeSign();
+    void printFormat( string format ) { cout<<format<<endl; }
+    Move getMove();
 
 private:
 
@@ -68,21 +86,17 @@ public:
     int chooseGame() { return 0; }
     int chooseDifficulty() { return 0; }
 
+    void printBoard(vector<vector<char>> board) const {}
+    void gameStart( string start ) {}
+    int ticTacToeSign() { return 0; }
+    void printFormat( string format ) { }
+    Move getMove() { Move move{0,0}; return move; }
+
 private:
 
 };
 
 /*======================== Game logic part ============================*/
-
-
-enum GameState { O , X , DRAW , PLAY };
-
-
-struct Move {
-    int row;
-    int column;
-};
-
 
 class Game {
 public: 
@@ -96,9 +110,11 @@ public:
 
     virtual bool getTurn() const        { return _turn; }
     virtual void setTurn( bool turn )   { _turn = turn; }
+    void setUI( GamesUI& ui)      { _ui = &ui; }
 
 protected:
     bool _turn; // 0-computer, 1-player
+    GamesUI* _ui;
 };
 
 
@@ -107,8 +123,6 @@ public:
     BoardGame();
     BoardGame(vector<vector<char>>);
     virtual ~BoardGame(){};
-
-    void print() const;
 
     virtual void start(){}
     virtual void getPlayerMove(){}
