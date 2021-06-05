@@ -11,6 +11,8 @@ class GamesUI;
 class Console;
 class GUI;
 class Game;
+class BoardGame;
+class TicTacToeGame;
 
 /*============= Bound between Game UI and the Game logic ================*/
 
@@ -62,7 +64,7 @@ public:
     GUI():GamesUI(){}
     ~GUI(){}
 
-    void start() { cout<<"Graphical interface unavailable."<<endl; }
+    void start() { cout<<"Graphical interface unavailable."<<endl; exit(1); }
     int chooseGame() { return 0; }
     int chooseDifficulty() { return 0; }
 
@@ -72,35 +74,56 @@ private:
 
 /*======================== Game logic part ============================*/
 
-struct GameState {
-    enum state { O , X , DRAW , CONTINUE };
+
+enum GameState { O , X , DRAW , PLAY };
+
+
+struct Move {
+    int row;
+    int column;
 };
 
 
 class Game {
 public: 
-    Game(){};
-    virtual ~Game(){};
+    Game(): _turn(0) {}
+    virtual ~Game() {};
 
-    //void getPlayerMove(Move);
-    virtual void getComputerMove() {}
-    //GameState getGameState();
+    virtual void start()=0;
+    virtual void getPlayerMove()=0;
+    virtual void getComputerMove()=0;
+    virtual GameState getGameState() const=0;
 
-private:
+    virtual bool getTurn() const        { return _turn; }
+    virtual void setTurn( bool turn )   { _turn = turn; }
+
+protected:
+    bool _turn; // 0-computer, 1-player
 };
 
 
 class BoardGame: public Game {
 public:
-    BoardGame():Game() {}
-    BoardGame(vector<vector<char>>):Game() {}
+    BoardGame();
+    BoardGame(vector<vector<char>>);
     virtual ~BoardGame(){};
 
-    virtual void getComputerMove() {}
-    //virtual GameState getGameState();
+    void print() const;
 
-private:
-    vector<vector<char>> board;
+    virtual void start(){}
+    virtual void getPlayerMove(){}
+    virtual void getComputerMove(){}
+
+    bool getTurn() const                    { return _turn; }
+    vector<vector<char>> getBoard() const   { return _board; }
+    virtual GameState getGameState() const  { return _state; }
+
+    void setTurn( bool turn )                   { _turn = turn; }   
+    void setBoard( vector<vector<char>> board)  { _board = board; }
+    void setGameState( GameState state )        { _state = state; }
+
+protected:
+    vector<vector<char>> _board;
     GameState _state;
 };
 
@@ -112,10 +135,11 @@ public:
     TicTacToeGame(vector<vector<char>> board): BoardGame(board) {}
     virtual ~TicTacToeGame(){};
 
-    virtual void getComputerMove() {}
-    //virtual GameState getGameState(){}
-    //void getPlayerMove(Move);
-    //GameState getGameState();
+    void start();
+    void getPlayerMove(){cout<<"Player!"<<endl;}
+    virtual void getComputerMove(){}
+
+    GameState getGameState() const { return _state; }
 
 private:
 };
@@ -127,9 +151,7 @@ public:
     TicTacToeEdu(vector<vector<char>> board): TicTacToeGame(board) {}
     ~TicTacToeEdu(){};
     
-    void getComputerMove(){ cout<<"It's Edu"<<endl; }
-    //GameState getGameState(){}
-    //void getPlayerMove(Move);
+    void getComputerMove(){cout<<"Educated computer!"<<endl;}
 
 private:
 };
@@ -141,9 +163,7 @@ public:
     TicTacToeRand(vector<vector<char>> board): TicTacToeGame(board) {}
     ~TicTacToeRand(){};
     
-    void getComputerMove(){ cout<<"It's Rand"<<endl; }
-    //GameState getGameState(){}
-    //void getPlayerMove(Move);
+    void getComputerMove(){cout<<"Random computer!"<<endl;}
 
 private:
 };

@@ -39,6 +39,7 @@ void GameController:: play() {
     switch(gameOption) {
         case 1:
             board.resize ( 3 , vector<char> (3,0) ); //define board 3x3 filled with zero
+            
             switch(difficulty) {         
                 case 1:
                     _game = new TicTacToeRand(board);
@@ -54,7 +55,11 @@ void GameController:: play() {
             exit(1);
     }
 
-    _game->getComputerMove();
+    _game->start();
+
+    //while(_game->getGameState()) {
+        _game->getTurn() ? _game->getPlayerMove() : _game->getComputerMove();
+    //}
 }
 
 /*============================ UI part =================================*/
@@ -110,3 +115,56 @@ int Console:: chooseDifficulty() {
 }
 
 /*======================== Game logic part ============================*/
+
+BoardGame::BoardGame()
+    :Game(), _state(PLAY) 
+    {}
+
+
+BoardGame::BoardGame(vector<vector<char>> board)
+    :Game(), _state(PLAY), _board(board)
+    {}
+
+void BoardGame::print () const {
+    for(int i=0; i<_board.size(); i++) {
+        for( int j=0; j<_board[0].size(); j++) {
+            if (_board[i][j] == 0)   cout<<"-   ";
+            else    cout<<_board[i][j]<<"   ";
+        }
+        cout<<endl;
+    }
+}
+
+void TicTacToeGame::start() {
+    string sign;
+    int result;
+
+    cout<< "_____ Tic Tac Toe_____ "<<endl;
+
+    //get the player sign
+    while(true){
+        cout<< "Choose your sign:"<<endl;
+        cout<< "1 - X"<<endl;
+        cout<< "2 - O"<<endl;
+        cout<< "> ";
+        cin>>sign;
+
+        if( isNum(sign) ){
+            result = stoi(sign);
+            if( result==1 ){
+                _turn = 1;
+                break;
+            }
+            else if( result==2 ){
+                _turn = 0;
+                break;
+            }
+            else cout<< "Wrong Input"<<endl;
+        }
+        else cout<< "Wrong Input"<<endl;
+    }
+
+    cout<< "Format: x y [x-row index, y-column index]"<<endl;
+    
+    BoardGame::print();
+}
