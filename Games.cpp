@@ -86,7 +86,8 @@ void GameController:: play() {
             }
             cout<<endl;
 
-            _game->clear(); //return the game to the initial parameters
+            //return the game to the initial parameters
+            _game->clear(); 
 
             //ask what to do next
             option = _ui->end();
@@ -136,7 +137,7 @@ int Console:: chooseGame() {
     return result;
 }
 
-//Asl the user what to do in the end of the game
+//Ask the user what to do in the end of the game
 int Console:: end() {
     string option;
     int result=0;
@@ -307,6 +308,36 @@ bool BoardGame::isFullBoard() const {
 }
 
 
+//return a vector of player moves
+vector<Move> TicTacToeGame::findPlayerMoves() const{
+    vector<Move> move;
+    for(int i=0; i<_board.size(); i++) {
+        for(int j=0; j<_board[i].size(); j++) {
+            if(_board[i][j] == _playerSign) {
+                Move m = {i,j};
+                move.push_back(m);
+            }
+        }
+    }
+    return move;
+}
+
+
+//return a vector of computer moves
+vector<Move> TicTacToeGame::findComputerMoves() const{
+    vector<Move> move;
+    for(int i=0; i<_board.size(); i++) {
+        for(int j=0; j<_board[i].size(); j++) {
+            if(_board[i][j] == _computerSign) {
+                Move m = {i,j};
+                move.push_back(m);
+            }
+        }
+    }
+    return move;
+}
+
+
 void TicTacToeGame::start() {
     _ui->print("_____ Tic Tac Toe_____ ");                    //print the game name
 
@@ -329,8 +360,7 @@ void TicTacToeGame::updateGameState() {
     bool rowFlag = true;
     bool columnFlag = true;
     bool diagonalFlag = true;
-    int i=0, j=1;
-    int c,r;
+    int i,c,r;
 
     //check if there is a row with the same non-zero values
     for(r=0; r<_board.size(); r++) {
@@ -429,11 +459,129 @@ void TicTacToeRand::getComputerMove() {
 }
 
 void TicTacToeEdu::getComputerMove() {
+    vector <Move> freeMoves = findAllFree();            //get a vector of all available moves
+    vector <Move> playerMoves = findPlayerMoves();      //get a vector of all player's moves
+    vector <Move> computerMoves = findComputerMoves();  //get a vector of all computer's moves
 
+    //find if there is a row/column/diagonal filled with 2 computer's moves 
+    for(int i=0; i<computerMoves.size(); i++) {
+        for(int j=i+1; j<computerMoves.size(); j++) {
+            //check row
+            if(computerMoves[i].row == computerMoves[j].row) {
+                for(int c=0; c<_board.size(); c++) {
+                    if(c!=computerMoves[i].column && c!=computerMoves[j].column && _board[computerMoves[i].row][c]==0) {
+                        Move m = { computerMoves[i].row, c };
+                        updateBoard(m, _computerSign);
+                        _turn = !_turn;
+                        _ui->printBoard(_board);
+                        return;
+                    }
+                }
+            }
+            //check column
+            if(computerMoves[i].column == computerMoves[j].column) {
+                for(int c=0; c<_board.size(); c++) {
+                    if(c!=computerMoves[i].row && c!=computerMoves[j].row && _board[c][computerMoves[i].column]==0) {
+                        Move m = { c, computerMoves[i].column };
+                        updateBoard(m, _computerSign);
+                        _turn = !_turn;
+                        _ui->printBoard(_board);
+                        return;
+                    }
+                }
+            }
+            //check diagonals
+            if((computerMoves[i].column == computerMoves[i].row) && (computerMoves[j].column == computerMoves[j].row)) {
+                for(int c=0; c<_board.size(); c++) {
+                    if(c!=computerMoves[i].column && c!=computerMoves[j].column && _board[c][c]==0) {
+                        Move m = { c, c };
+                        updateBoard(m, _computerSign);
+                        _turn = !_turn;
+                        _ui->printBoard(_board);
+                        return;
+                    }
+                }
+            }
+            if((isSameMove(computerMoves[i],{0,2}) || isSameMove(computerMoves[i],{1,1}) || isSameMove(computerMoves[i],{2,0}))&&
+                (isSameMove(computerMoves[j],{0,2}) || isSameMove(computerMoves[j],{1,1}) || isSameMove(computerMoves[j],{2,0}))) {
+                for(int c=0; c<_board.size(); c++) {
+                    if(c!=computerMoves[i].column && c!=computerMoves[j].column) {
+                        for(int r=0; r<_board.size(); r++) {
+                            if(r!=computerMoves[i].row && r!=computerMoves[j].row && _board[r][c]==0) {
+                                Move m = { r, c };
+                                updateBoard(m, _computerSign);
+                                _turn = !_turn;
+                                _ui->printBoard(_board);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
+    //find if there is a row/column/diagonal filled with 2 player's moves
+    for(int i=0; i<playerMoves.size(); i++) {
+        for(int j=i+1; j<playerMoves.size(); j++) {
+            //check row
+            if(playerMoves[i].row == playerMoves[j].row) {
+                for(int c=0; c<_board.size(); c++) {
+                    if(c!=playerMoves[i].column && c!=playerMoves[j].column && _board[playerMoves[i].row][c]==0) {
+                        Move m = { playerMoves[i].row, c };
+                        updateBoard(m, _computerSign);
+                        _turn = !_turn;
+                        _ui->printBoard(_board);
+                        return;
+                    }
+                }
+            }
+            //check column
+            if(playerMoves[i].column == playerMoves[j].column) {
+                for(int c=0; c<_board.size(); c++) {
+                    if(c!=playerMoves[i].row && c!=playerMoves[j].row && _board[c][playerMoves[i].column]==0) {
+                        Move m = { c, playerMoves[i].column };
+                        updateBoard(m, _computerSign);
+                        _turn = !_turn;
+                        _ui->printBoard(_board);
+                        return;
+                    }
+                }
+            }
+            //check diagonals
+            if((playerMoves[i].column == playerMoves[i].row) && (playerMoves[j].column == playerMoves[j].row)) {
+                for(int c=0; c<_board.size(); c++) {
+                    if(c!=playerMoves[i].column && c!=playerMoves[j].column && _board[c][c]==0) {
+                        Move m = { c, c };
+                        updateBoard(m, _computerSign);
+                        _turn = !_turn;
+                        _ui->printBoard(_board);
+                        return;
+                    }
+                }
+            }
+            if((isSameMove(playerMoves[i],{0,2}) || isSameMove(playerMoves[i],{1,1}) || isSameMove(playerMoves[i],{2,0}))&&
+                (isSameMove(playerMoves[j],{0,2}) || isSameMove(playerMoves[j],{1,1}) || isSameMove(playerMoves[j],{2,0}))) {
+                for(int c=0; c<_board.size(); c++) {
+                    if(c!=playerMoves[i].column && c!=playerMoves[j].column) {
+                        for(int r=0; r<_board.size(); r++) {
+                            if(r!=playerMoves[i].row && r!=playerMoves[j].row && _board[r][c]==0) {
+                                Move m = { r, c };
+                                updateBoard(m, _computerSign);
+                                _turn = !_turn;
+                                _ui->printBoard(_board);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-
-    //updateBoard(Move, sign)
+    //else - make a random move
+    int index = rand() % freeMoves.size();
+    updateBoard(freeMoves[index], _computerSign);
     _turn = !_turn;
     _ui->printBoard(_board);
 }

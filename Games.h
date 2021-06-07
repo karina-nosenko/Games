@@ -110,6 +110,8 @@ public:
     virtual void updateGameState()=0;
     virtual vector<vector<char>> getBoard() const=0;
     virtual void clear()=0;
+    virtual vector<Move> findPlayerMoves() const=0;
+    virtual vector<Move> findComputerMoves() const=0;
 
     virtual bool getTurn() const        { return _turn; }
     virtual void setTurn( bool turn )   { _turn = turn; }
@@ -134,6 +136,9 @@ public:
     void updateBoard(Move move, char sign) { _board[move.row][move.column] = sign; }
     bool isFullBoard() const;
     void clear();
+    virtual vector<Move> findPlayerMoves() const {vector<Move> move; return move;}
+    virtual vector<Move> findComputerMoves() const {vector<Move> move; return move;}
+    bool isSameMove(Move m1, Move m2) const { return (m1.column==m2.column) && (m1.row==m2.row) ? true:false; }
 
     bool getTurn() const                    { return _turn; }
     vector<vector<char>> getBoard() const   { return _board; }
@@ -161,6 +166,8 @@ public:
     bool isFree(Move) const;
     vector <Move> findAllFree() const;
     void updateGameState();
+    vector<Move> findPlayerMoves() const;
+    vector<Move> findComputerMoves() const;
 
     GameState getGameState() const { return _state; }
 
@@ -176,7 +183,7 @@ public:
     TicTacToeEdu(vector<vector<char>> board): TicTacToeGame(board) {}
     ~TicTacToeEdu(){};
     
-    void getComputerMove(){cout<<"Educated computer!"<<endl;}
+    void getComputerMove();
 
 private:
 };
