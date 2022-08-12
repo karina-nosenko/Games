@@ -1,6 +1,5 @@
 #include "Games.h"
 
-/*Returns true if the string represents a number*/
 bool isNum(string num) {
     for(int i=0; i<num.length(); i++) {
         if (!isdigit(num[i]))
@@ -19,12 +18,10 @@ GameController:: GameController (char const* mode) {
     else                  _ui = new GUI;
 }
 
-
 GameController:: ~GameController () {
     delete _ui;
     if(_game)   delete _game;
 }
-
 
 void GameController:: play() {
     int option;
@@ -86,7 +83,6 @@ void GameController:: play() {
             }
             cout<<endl;
 
-            //return the game to the initial parameters
             _game->clear(); 
 
             //ask what to do next
@@ -175,8 +171,7 @@ void Console::printBoard(vector<vector<char>> board) const {
     cout<<endl;
 }
 
-
-//Get player sign ( 0=O, 1=X )
+//Get player's sign ( 0 = O, 1 = X )
 int Console::ticTacToeSign() {
     string sign;
     int result;
@@ -274,7 +269,6 @@ void BoardGame::clear() {
 }
 
 
-//check if the place on the board is free
 bool TicTacToeGame::isFree(Move move) const {
     return _board[move.row][move.column] == 0;
 }
@@ -295,8 +289,6 @@ vector <Move> TicTacToeGame::findAllFree() const {
     return freeMoves;
 }
 
-
-//check if the board is full
 bool BoardGame::isFullBoard() const {
     for(int i=0; i<_board.size(); i++) {
         for(int j=0; j<_board[i].size(); j++) {
@@ -307,8 +299,6 @@ bool BoardGame::isFullBoard() const {
     return true;
 }
 
-
-//return a vector of player moves
 vector<Move> TicTacToeGame::findPlayerMoves() const{
     vector<Move> move;
     for(int i=0; i<_board.size(); i++) {
@@ -322,8 +312,6 @@ vector<Move> TicTacToeGame::findPlayerMoves() const{
     return move;
 }
 
-
-//return a vector of computer moves
 vector<Move> TicTacToeGame::findComputerMoves() const{
     vector<Move> move;
     for(int i=0; i<_board.size(); i++) {
@@ -337,11 +325,10 @@ vector<Move> TicTacToeGame::findComputerMoves() const{
     return move;
 }
 
-
 void TicTacToeGame::start() {
-    _ui->print("_____ Tic Tac Toe_____ ");                    //print the game name
+    _ui->print("_____ Tic Tac Toe_____ ");
 
-    _turn = _ui->ticTacToeSign();                             //get a sign from the user and determine the turn (X starts first)
+    _turn = _ui->ticTacToeSign();
     if(_turn) {
         _playerSign = 'X';
         _computerSign = 'O';
@@ -351,10 +338,9 @@ void TicTacToeGame::start() {
         _computerSign = 'X';
     }
 
-    _ui->print("Format: x y [x-row index, y-column index]");  //print the game format    
-    _ui->printBoard(_board);                                  //print the game board
+    _ui->print("Format: x y [x-row index, y-column index]");    
+    _ui->printBoard(_board);
 }
-
 
 void TicTacToeGame::updateGameState() {
     bool rowFlag = true;
@@ -422,13 +408,11 @@ void TicTacToeGame::updateGameState() {
         }
     }
 
-    //check if the board is full
     if(isFullBoard()) {
         _state = DRAW;
         return;
     }
 
-    //else - continue the game
     _state = PLAY;
 }
 
@@ -459,9 +443,9 @@ void TicTacToeRand::getComputerMove() {
 }
 
 void TicTacToeEdu::getComputerMove() {
-    vector <Move> freeMoves = findAllFree();            //get a vector of all available moves
-    vector <Move> playerMoves = findPlayerMoves();      //get a vector of all player's moves
-    vector <Move> computerMoves = findComputerMoves();  //get a vector of all computer's moves
+    vector <Move> freeMoves = findAllFree();
+    vector <Move> playerMoves = findPlayerMoves();
+    vector <Move> computerMoves = findComputerMoves();
 
     //find if there is a row/column/diagonal filled with 2 computer's moves 
     for(int i=0; i<computerMoves.size(); i++) {
